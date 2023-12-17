@@ -15,8 +15,6 @@
 // under the License.
 
 import ballerinax/mysql;
-import ballerinax/nats;
-import balguides/sentiment.analysis;
 
 type DataBaseConfig record {|
     string host;
@@ -32,44 +30,38 @@ function initDbClient() returns mysql:Client|error => new (...databaseConfig);
 type SentimentEndpointConfig record {|
     string endpointUrl;
     decimal retryInterval;
-    record {|
-        string refreshUrl;
-        string clientId;
-        string clientSecret;
-        string refreshToken;
-    |} authConfig;
 |};
 configurable SentimentEndpointConfig sentimentEndpointSecConfig = ?;
-final analysis:Client sentimentEndpoint = check new (serviceUrl = sentimentEndpointSecConfig.endpointUrl,
-    config = {
-        retryConfig: {
-            interval: sentimentEndpointSecConfig.retryInterval
-        },
-        auth: {
-            ...sentimentEndpointSecConfig.authConfig,
-            clientConfig: {
-                secureSocket: {
-                    cert: "./resources/public.crt"
-                }
-            }
-        },
-        secureSocket: {
-            cert: "./resources/public.crt"
-        }
-    }
-);
+// final analysis:Client sentimentEndpoint = check new (serviceUrl = sentimentEndpointSecConfig.endpointUrl,
+//     config = {
+//         retryConfig: {
+//             interval: sentimentEndpointSecConfig.retryInterval
+//         },
+//         auth: {
+//             ...sentimentEndpointSecConfig.authConfig,
+//             clientConfig: {
+//                 secureSocket: {
+//                     cert: "./resources/public.crt"
+//                 }
+//             }
+//         },
+//         secureSocket: {
+//             cert: "./resources/public.crt"
+//         }
+//     }
+// );
 
-type NatsConfig record {|
-    record {|
-        int maxReconnect;
-        decimal reconnectWait;
-        decimal connectionTimeout;
-    |} retryConfig;
-    string url;
-|};
-configurable NatsConfig natsConfig = ?;
-final nats:Client natsClient = check new (natsConfig.url, 
-    retryConfig = {
-        ...natsConfig.retryConfig
-    }
-);
+// type NatsConfig record {|
+//     record {|
+//         int maxReconnect;
+//         decimal reconnectWait;
+//         decimal connectionTimeout;
+//     |} retryConfig;
+//     string url;
+// |};
+// configurable NatsConfig natsConfig = ?;
+// final nats:Client natsClient = check new (natsConfig.url, 
+//     retryConfig = {
+//         ...natsConfig.retryConfig
+//     }
+// );

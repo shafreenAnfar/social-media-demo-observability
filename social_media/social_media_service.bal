@@ -21,11 +21,12 @@ import ballerina/sql;
 import ballerina/time;
 import ballerinax/mysql.driver as _;
 import balguides/sentiment.analysis;
+import ballerinax/prometheus as _;
+import ballerinax/jaeger as _;
 
-configurable boolean moderate = ?;
-configurable boolean enableSlackNotification = ?;
+final http:Client sentimentEndpoint = check new (sentimentEndpointSecConfig.endpointUrl);
 
-listener http:Listener socialMediaListener = new (9090);
+listener http:Listener socialMediaListener = new (9095);
 
 service SocialMedia /social\-media on socialMediaListener {
 
@@ -136,7 +137,6 @@ service SocialMedia /social\-media on socialMediaListener {
         _ = check socialMediaDb->execute(`
             INSERT INTO posts(description, category, created_date, tags, user_id)
             VALUES (${newPost.description}, ${newPost.category}, CURDATE(), ${newPost.tags}, ${id});`);
-        _ = start publishUserPostUpdate(user.id);
         return http:CREATED;
     }
 }
@@ -158,14 +158,3 @@ function mapPostToPostWithMeta(Post[] post) returns PostWithMeta[] => from var p
         }
     };
 
-function publishUserPostUpdate(int userId) returns error? {
-    if !enableSlackNotification {
-        return;
-    }
-    check natsClient->publishMessage({
-        subject: "ballerina.social.media",
-        content: {
-            "leaderId": userId
-        }
-    });
-}
