@@ -26,9 +26,7 @@ import ballerinax/jaeger as _;
 
 final http:Client sentimentEndpoint = check new (sentimentEndpointSecConfig.endpointUrl);
 
-listener http:Listener socialMediaListener = new (9095);
-
-service SocialMedia /social\-media on socialMediaListener {
+service SocialMedia /social\-media on new http:Listener(9095) {
 
     public function init() returns error? {
         log:printInfo("Social media service started");
